@@ -39,14 +39,14 @@ export default class App extends React.Component {
 				>
 					<View style={styles.getStartedContainer}>
 						{image ? null : (
-							<Text style={styles.getStartedText}>Google Cloud Vision</Text>
+							<Text style={styles.getStartedText}>Team Nap</Text>
 						)}
 					</View>
 
 					<View style={styles.helpContainer}>
 						<Button
 							onPress={this._pickImage}
-							title="Pick an image from camera roll"
+							title="Pick an image"
 						/>
 
 						<Button onPress={this._takePhoto} title="Take a photo" />
@@ -55,7 +55,7 @@ export default class App extends React.Component {
 								data={this.state.googleResponse.responses[0].labelAnnotations}
 								extraData={this.state}
 								keyExtractor={this._keyExtractor}
-								renderItem={({ item }) => <Text>Item: {item.description}</Text>}
+								renderItem={({ item }) => <Text>{item.description}</Text>}
 							/>
 						)}
 						{this._maybeRenderImage()}
@@ -113,7 +113,7 @@ export default class App extends React.Component {
 				<Button
 					style={{ marginBottom: 10 }}
 					onPress={() => this.submitToGoogle()}
-					title="Analyze!"
+					title="Submit!"
 				/>
 
 				<View
@@ -135,7 +135,7 @@ export default class App extends React.Component {
 					style={{ paddingVertical: 10, paddingHorizontal: 10 }}
 				/>
 
-				<Text>Raw JSON:</Text>
+				{/* <Text>Raw JSON:</Text>
 
 				{googleResponse && (
 					<Text
@@ -145,7 +145,7 @@ export default class App extends React.Component {
 					>
 						JSON.stringify(googleResponse.responses)}
 					</Text>
-				)}
+				)} */}
 			</View>
 		);
 	};
