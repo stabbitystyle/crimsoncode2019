@@ -59,10 +59,13 @@ export default class App extends React.Component {
 								keyExtractor={this._keyExtractor}
 								renderItem={({ item }) => <Text>{item.description}</Text>}
 							/>
-						)}
+            )}
+
+            <Button onPress={this.loginSnap} title = "Login" />
 						{this._maybeRenderImage()}
 						{this._maybeRenderUploadingOverlay()}
-					</View>
+					
+          </View>
 				</ScrollView>
 			</View>
 		);
@@ -77,6 +80,43 @@ export default class App extends React.Component {
 			);
 		});
 	};
+
+  loginSnap = () => {
+    return (
+      <html lang="en">
+        <body>
+          <div id="my-login-button-target" />
+          {
+            window.snapKitInit = function () {
+              var loginButtonIconId = 'my-login-button-target';
+              // Mount Login Button
+              snap.loginkit.mountButton(loginButtonIconId, {
+                clientId: '53e12331-1e42-4ae0-9954-aebbed1c4f8a',
+                redirectURI: 'http://localhost:19002',
+                scopeList: [
+                  'user.display_name',
+                  'user.bitmoji.avatar',
+                ],
+                handleResponseCallback: function() {
+                  snap.loginkit.fetchUserInfo()
+                    .then(data => console.log('User info:', data));
+                },
+              });
+            }
+
+            // Load the SDK asynchronously
+            (function (d, s, id) {
+              var js, sjs = d.getElementsByTagName(s)[0];
+              if (d.getElementById(id)) return;
+              js = d.createElement(s); js.id = id;
+              js.src = "https://sdk.snapkit.com/js/v1/login.js";
+              sjs.parentNode.insertBefore(js, sjs);
+            }(document, 'script', 'loginkit-sdk'))
+          }
+        </body>
+      </html>
+    );
+  }
 
 	_maybeRenderUploadingOverlay = () => {
 		if (this.state.uploading) {
