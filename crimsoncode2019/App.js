@@ -46,9 +46,7 @@ export default class App extends React.Component {
 							<Text style={styles.getStartedText}>Team Nap</Text>
 						)}
 					</View>
-
 					<View style={styles.helpContainer}>
-
             <Text>Try to match:</Text>
             {this.state.mainLabels && (
               <FlatList
@@ -210,7 +208,6 @@ export default class App extends React.Component {
 					onLongPress={this._share}
 					style={{ paddingVertical: 10, paddingHorizontal: 10 }}
 				/>
-
 				{/* <Text>Raw JSON:</Text>
 
 				{googleResponse && (
@@ -227,11 +224,9 @@ export default class App extends React.Component {
 	};
 
 	_keyExtractor = (item, index) => item.id;
-
 	_renderItem = item => {
 		<Text>response: {JSON.stringify(item)}</Text>;
 	};
-
 	_share = () => {
 		Share.share({
 			message: JSON.stringify(this.state.googleResponse.responses),
