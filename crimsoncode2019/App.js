@@ -19,13 +19,17 @@ import firebase from './config/firebase';
 export default class App extends React.Component {
 	state = {
 		image: null,
+		playerImage: null,
 		uploading: false,
-		googleResponse: null
+    googleResponse: null,
+		mainLabels: null,
+		matches: null
 	};
 
 	async componentDidMount() {
 		await Permissions.askAsync(Permissions.CAMERA_ROLL);
 		await Permissions.askAsync(Permissions.CAMERA);
+		this.readMainLabels();
 	}
 
 	render() {
@@ -44,12 +48,29 @@ export default class App extends React.Component {
 					</View>
 
 					<View style={styles.helpContainer}>
+
+            <Text>Try to match:</Text>
+            {this.state.mainLabels && (
+              <FlatList
+                data={this.state.mainLabels}
+                extraData={this.state}
+                keyExtractor={this._keyExtractor}
+                renderItem={({ item }) => <Text>{item}</Text>}
+              />
+            )}
+
+              <Button
+                onPress={this.newGame}
+                title="New Game"
+              />
+
 						<Button
 							onPress={this._pickImage}
 							title="Pick an image"
 						/>
 
 						<Button onPress={this._takePhoto} title="Take a photo" />
+            {/* Labels are rendered */}
 						{this.state.googleResponse && (
 							<FlatList
 								data={this.state.googleResponse.responses[0].labelAnnotations}
@@ -58,13 +79,66 @@ export default class App extends React.Component {
 								renderItem={({ item }) => <Text>{item.description}</Text>}
 							/>
 						)}
+						{this.state.matches && (
+								<Text>You had: {this.state.matches} matches!</Text>
+						)}
 						{this._maybeRenderImage()}
 						{this._maybeRenderUploadingOverlay()}
 					</View>
 				</ScrollView>
 			</View>
 		);
+  }
+  
+  saveMainLabels = () => {
+    const labels = this.state.googleResponse.responses[0].labelAnnotations.map(item => item.description);
+    firebase.database().ref('MainLabels/').set({
+      mainLabels: labels
+    })
+  }
+
+  readMainLabels = () => {
+    var mainLabelsRef = firebase.database().ref('MainLabels/');
+    mainLabelsRef.once('value').then(snapshot => {
+      this.setState({ mainLabels: snapshot.val().mainLabels })
+    })
+  }
+
+	updateMainLabels = (newLabels) => {
+		firebase.database().ref('MainLabels/').update({
+			mainLabels: newLabels,
+		});
 	}
+
+	newGame = async () => {
+		let pickerResult = await ImagePicker.launchCameraAsync({
+			allowsEditing: true,
+			aspect: [4, 3]
+		});
+
+		this._handlePlayerImagePicked(pickerResult);
+	}
+
+	_handlePlayerImagePicked = async pickerResult => {
+		try {
+			this.setState({ uploading: true });
+
+			if (!pickerResult.cancelled) {
+				uploadUrl = await uploadImageAsync(pickerResult.uri);
+				this.setState({ playerImage: uploadUrl });
+			}
+		} catch (e) {
+			console.log(e);
+			alert('Upload failed, sorry :(');
+		} finally {
+			this.setState({ uploading: false });
+		}
+	};
+  // newGame = () => {
+	// 	console.log("called");
+	// 	this.updateMainLabels(null);
+	// 	this.setState({ mainLabels: [] })
+	// }
 
 	organize = array => {
 		return array.map(function(item, i) {
@@ -112,7 +186,9 @@ export default class App extends React.Component {
 			>
 				<Button
 					style={{ marginBottom: 10 }}
-					onPress={() => this.submitToGoogle()}
+          onPress={() => 
+            this.submitToGoogle()
+          }
 					title="Submit!"
 				/>
 
@@ -242,12 +318,25 @@ export default class App extends React.Component {
 					body: body
 				}
 			);
-			let responseJson = await response.json();
-			console.log(responseJson);
+      let responseJson = await response.json();
+			var playerLabels = responseJson.responses[0].labelAnnotations.map(item => item.description);
+			var matchingCount = 0;
+			const { mainLabels } = this.state;
+			playerLabels.forEach(function(label) {
+				mainLabels.forEach(function(mainLabel){
+					if (label === mainLabel) {
+						matchingCount++;
+					}
+				})
+			})
+			console.log("Matches: ", matchingCount);
+
 			this.setState({
 				googleResponse: responseJson,
+				matches: matchingCount,
 				uploading: false
-			});
+      });
+      this.saveMainLabels();
 		} catch (error) {
 			console.log(error);
 		}
