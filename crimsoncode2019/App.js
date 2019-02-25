@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 import {
 	ActivityIndicator,
 	Button,
@@ -81,8 +82,8 @@ export default class App extends React.Component {
 								renderItem={({ item }) => <Text>{item.description}</Text>}
 							/>
             )}
-
-            <Button onPress={this.loginSnap} title = "Login" />
+            
+            <Button onPress={this.loginSnap} title = "Login" /> 
 					
 						{this.state.matches && (
 								<Text>You had: {this.state.matches} matches!</Text>
@@ -159,7 +160,7 @@ export default class App extends React.Component {
   loginSnap = () => {
     return (
       <html lang="en">
-        <body>
+        <body>         
           <div id="my-login-button-target" />
           {
             window.snapKitInit = function () {
@@ -180,7 +181,7 @@ export default class App extends React.Component {
             }
 
             // Load the SDK asynchronously
-            (function (d, s, id) {
+              (function (d, s, id) {
               var js, sjs = d.getElementsByTagName(s)[0];
               if (d.getElementById(id)) return;
               js = d.createElement(s); js.id = id;
